@@ -18,22 +18,16 @@
 
 set -e
 
-. "lib/common.sh"
-. "${CLEARNET_VBOX_ENV_FILE}" # Need HVM_HOME
+# Need HIDDENVM_SUDO_TIMEOUT_POLICY. Note that this script is intended to be
+# run with sudo, so we must include common.sh from outside the AppImage mount.
+# Otherwise this code will fail to execute due to permission issues caused by
+# an AppImage/FUSE limitation.
+. "/home/amnesia/.clearnet-vbox/common.sh"
 
-enforce_amnesia
+enforce_root
 
-DOTFILE="${1}"
-DIR="$(dirname "${DOTFILE}")"
-FNAME="$(basename "${DOTFILE}")"
-
-PATH_TO_REMOVE="${HVM_HOME}/extras/dotfiles"
-NEW_BASE_DIR="/home/amnesia"
-
-SUBDIR="$(echo "${DIR}" | sed "s#${PATH_TO_REMOVE}##")"
-NEWDIR="${NEW_BASE_DIR}${SUBDIR}"
-NEWPATH="${NEWDIR}/${FNAME}"
-
-log "Symlink ${DOTFILE} --> ${NEWPATH}"
-mkdir -p "${NEWDIR}"
-ln -sf "${DOTFILE}" "${NEWDIR}"
+# IMPORTANT: sudo parses files in /etc/sudoers.d in lexical order. We want this
+# file to be parsed last to prevent others from overriding its settings, hence
+# all the z's in the beginning of the file name.
+echo "Defaults:amnesia timestamp_timeout=-1" > "${HIDDENVM_SUDO_TIMEOUT_POLICY}"
+chmod 440 "${HIDDENVM_SUDO_TIMEOUT_POLICY}"

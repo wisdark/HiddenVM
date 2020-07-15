@@ -43,6 +43,10 @@ setup_clearnet() {
     # IMPORTANT: sudo parses files in /etc/sudoers.d in lexical order. We want this
     # file to be parsed last to prevent others from overriding its settings, hence
     # all the z's in the beginning of the file name.
-    sudo cp "${CLEARNET_VBOX_LIB_HOME}/assets/hiddenvm-sudoer" /etc/sudoers.d/zzzzzzzzzz-hiddenvm-sudoer
-    sudo chmod 440 /etc/sudoers.d/zzzzzzzzzz-hiddenvm-sudoer
+    local SUDOER_FILE_NAME="zzzzzzzzzz-hiddenvm-01-sudoer"
+    # Copy to /tmp first because sudo can't access the file from within the AppImage mount
+    cp "lib/assets/${SUDOER_FILE_NAME}" /tmp/
+    sudo chown root:root "/tmp/${SUDOER_FILE_NAME}"
+    sudo chmod 440 "/tmp/${SUDOER_FILE_NAME}"
+    sudo mv "/tmp/${SUDOER_FILE_NAME}" /etc/sudoers.d/
 }

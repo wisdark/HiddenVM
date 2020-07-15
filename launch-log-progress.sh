@@ -51,7 +51,32 @@ exec &> >(tee >(tee "${LOG_FILE}" | \
     zenity --width 400 --title "HiddenVM" --progress --no-cancel --auto-close 2>/dev/null
 ))
 
-./bootstrap.sh "${ENV_FILE}" ||
+
+# We need HIDDENVM_SUDO_TIMEOUT_POLICY
+. "lib/common.sh"
+# Unset these, which were set by common.sh. We don't want
+# a failure in bootstrap.sh to terminate this process.
+set +e
+set +u
+
+reset_sudo_timeout_policy() {
+    # Use -n here to prevent prompt in case bootstrap.sh fails prematurely before
+    # successful authentication. In such case the HiddenVM sudo timeout policy
+    # file wouldn't have been installed anyway.
+    log "Reset sudo timeout policy"
+    sudo -n rm -f "${HIDDENVM_SUDO_TIMEOUT_POLICY}" >/dev/null 2>&1
+    sudo -K
+    return 0
+}
+
+# Run bootstrap.sh
+if ./bootstrap.sh "${ENV_FILE}"; then
+    reset_sudo_timeout_policy
+    exit 0
+else
+    reset_sudo_timeout_policy
+    # Let zenity take over this process
     exec zenity --width 400 --error --title "HiddenVM" \
         --text "The installation did not complete! Check the log file for details." \
         >/dev/null 2>&1
+fi

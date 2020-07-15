@@ -22,15 +22,12 @@ set -u
 
 SECONDS=0 # Reset elapsed time
 
-# The directory where this script lives
-SCRIPT_HOME="$(dirname "$(readlink -f "${0}")")"
-
 # Source some common variables and functions we need
-. "${SCRIPT_HOME}/lib/common.sh"
+. "lib/common.sh"
 
 enforce_amnesia
 
-HVM_VERSION_FILE="${SCRIPT_HOME}/HVM_VERSION"
+HVM_VERSION_FILE="./HVM_VERSION"
 HVM_VERSION_FROM_VERSION_FILE=$(cat "${HVM_VERSION_FILE}")
 
 # Set the terminal title
@@ -47,7 +44,7 @@ cat <<EOF
 EOF
 
 # Check if the Tails version is supported and let the user decide whether to continue
-if ! is_tails_version_supported "${SCRIPT_HOME}/SUPPORTED_TAILS_VERSIONS"; then
+if ! is_tails_version_supported "./SUPPORTED_TAILS_VERSIONS"; then
     CUR_TAILS_VERSION=$(get_tails_version)
 
     log "WARNING: HiddenVM v${HVM_VERSION_FROM_VERSION_FILE} might not be compatible with your version of Tails (${CUR_TAILS_VERSION}). The installation may fail."
@@ -57,6 +54,46 @@ fi
 # Make sure the CLEARNET_VBOX_LIB_HOME directory exists and is clean
 rm -rf "${CLEARNET_VBOX_LIB_HOME}"
 mkdir -p "${CLEARNET_VBOX_LIB_HOME}"
+
+log "Copy files to ${CLEARNET_VBOX_LIB_HOME}, prog-id=2"
+
+# Install some scripts/libraries to CLEARNET_VBOX_LIB_HOME to support some
+# HiddenVM features that can launch from outside the AppImage mount, such as
+# the user manually launching Clearnet VirtualBox.
+cp "lib/common.sh" "${CLEARNET_VBOX_LIB_HOME}"
+cp "lib/clearnet-vbox.sh" "${CLEARNET_VBOX_LIB_HOME}"
+chmod +x "${CLEARNET_VBOX_LIB_HOME}/clearnet-vbox.sh"
+
+# Copy these files outside the AppImage mount to make them accessible to sudo.
+# There's an AppImage/FUSE limitation that prevents files located within an
+# AppImage mount from being accessible to sudo.  :(
+cp "lib/assets/hiddenvm.list" "${CLEARNET_VBOX_LIB_HOME}"
+cp "lib/never-ask-password.sh" "${CLEARNET_VBOX_LIB_HOME}"
+chmod +x "${CLEARNET_VBOX_LIB_HOME}/never-ask-password.sh"
+
+# Override the "always ask for password" Tails sudo policy. First validate the
+# entered admin password, making the user retry until successful. Then override
+# the policy and refresh the credentials so that future sudo commands won't
+# require authentication.
+while :
+do
+    sudo -K # clear credentials cache to force authentication
+    ADMIN_PASS=$(zenity --password --title "Admin password needed" 2>/dev/null)
+    echo "${ADMIN_PASS}" | sudo -S -v > /dev/null 2>&1 && break
+done
+echo "${ADMIN_PASS}" | sudo -S "${CLEARNET_VBOX_LIB_HOME}/never-ask-password.sh"
+echo "${ADMIN_PASS}" | sudo -S -v > /dev/null 2>&1
+
+# Give ownership of the amnesia mounts to the amnesia user+group and relax the permissions.
+# For example, new Veracrypt volume mounts are initially owned by root:root.
+log "Set up permissions on amnesia mounts, prog-id=3"
+sudo mkdir -p /media/amnesia
+sudo chown amnesia:amnesia /media/amnesia
+sudo chmod 710 /media/amnesia
+sudo chown amnesia:amnesia /media/amnesia/* || true # Ignore failures
+sudo chmod 775 /media/amnesia/* || true # Ignore failures
+
+log "Process configuration, prog-id=4"
 
 # Function: Asks the user to select their HiddenVM home directory, pre-selecting
 # /media/amnesia. Note that this function sets the HVM_HOME variable!
@@ -80,41 +117,6 @@ choose_hiddenvm_home_dir() {
     # Ensure HVM_HOME is set to what the user actually selected
     HVM_HOME="${CHOSEN_HVM_HOME}"
 }
-
-# Disable the "always ask for password" Tails sudo policy. First validate the
-# entered admin password, making the user retry until successful. Then disable
-# the policy and refresh the credentials so that future sudo commands won't
-# require authentication until expiry (the default is 15 minutes).
-TAILS_SUDO_TIMEOUT_POLICY="/etc/sudoers.d/always-ask-password"
-while :
-do
-    sudo -K # clear credentials cache to force authentication
-    ADMIN_PASS=$(zenity --password --title "Admin password needed" 2>/dev/null)
-    echo "${ADMIN_PASS}" | sudo -S -v > /dev/null 2>&1 && break
-done
-echo "${ADMIN_PASS}" | \
-    sudo -S mv "${TAILS_SUDO_TIMEOUT_POLICY}" "${TAILS_SUDO_TIMEOUT_POLICY}.disabled" \
-    2>/dev/null || true
-echo "${ADMIN_PASS}" | sudo -S -v > /dev/null 2>&1
-
-# Install files needed externally to CLEARNET_VBOX_LIB_HOME
-log "Copy files to ${CLEARNET_VBOX_LIB_HOME}, prog-id=2"
-cp "${SCRIPT_HOME}/lib/common.sh" "${CLEARNET_VBOX_LIB_HOME}"
-cp "${SCRIPT_HOME}/lib/clearnet-vbox.sh" "${CLEARNET_VBOX_LIB_HOME}"
-chmod +x "${CLEARNET_VBOX_LIB_HOME}/clearnet-vbox.sh"
-cp "${SCRIPT_HOME}/lib/process-dotfile.sh" "${CLEARNET_VBOX_LIB_HOME}"
-chmod +x "${CLEARNET_VBOX_LIB_HOME}/process-dotfile.sh"
-cp -r "${SCRIPT_HOME}/lib/assets" "${CLEARNET_VBOX_LIB_HOME}"
-
-# Give ownership of the amnesia mounts to the amnesia user+group and relax the permissions.
-# For example, new Veracrypt volume mounts are initially owned by root:root.
-log "Set up permissions on amnesia mounts, prog-id=3"
-sudo chown amnesia:amnesia /media/amnesia
-sudo chown amnesia:amnesia /media/amnesia/* || true # Ignore failures
-sudo chmod 710 /media/amnesia
-sudo chmod 775 /media/amnesia/* || true # Ignore failures
-
-log "Process configuration, prog-id=4"
 
 # Expect an env file path from the first cmd line arg
 PROVIDED_ENV_FILE="${1:-}" # Default arg to empty
@@ -158,11 +160,11 @@ cp "${CLEARNET_VBOX_ENV_FILE}" "${HVM_HOME}/env"
 mkdir -p "${HVM_HOME}/logs"
 
 # Source the libraries we need
-. "${SCRIPT_HOME}/lib/system.sh"
-. "${SCRIPT_HOME}/lib/packages.sh"
-. "${SCRIPT_HOME}/lib/clearnet.sh"
-. "${SCRIPT_HOME}/lib/virtualbox.sh"
-. "${SCRIPT_HOME}/lib/extras-setup.sh"
+. "lib/system.sh"
+. "lib/packages.sh"
+. "lib/clearnet.sh"
+. "lib/virtualbox.sh"
+. "lib/extras-setup.sh"
 
 # Run setup steps in the proper order
 configure_system
@@ -213,7 +215,7 @@ back_up_apt_packages
 
 # Lastly, copy some resources to HVM_HOME
 log "Copy 'extras' to ${HVM_HOME}"
-cp -r "${SCRIPT_HOME}/extras" "${HVM_HOME}/"
+cp -r ./extras/ "${HVM_HOME}/"
 
 log "Done! Runtime: ${SECONDS}s, prog-id=25"
 
