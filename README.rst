@@ -1,6 +1,16 @@
-========
-HiddenVM
-========
+|foo|
+
+.. |foo| raw:: html
+
+    <a href="#About"><img src="./misc/hiddenvm-logo-full.svg" width="100%" height="184pt"></a>
+    <p align="center"><a href="#About"><img src="https://dummyimage.com/1x45/ffffff/ffffff.png" /></a> <a href="#About"><img src="https://img.shields.io/github/v/release/aforensics/HiddenVM.svg?color=%2344cc11ff&label=version" /></a>&nbsp; <a href="#About"><img src="https://camo.githubusercontent.com/bf135a9cea09d0ea4bba410582c0e70ec8222736/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4c6963656e73652d47504c25323076332d626c75652e737667" /></a>&nbsp; <a href="#About"><img src="https://img.shields.io/github/downloads/aforensics/HiddenVM/total?color=%236b2981" /></a>&nbsp; <a href="#About"><img src="https://img.shields.io/github/stars/aforensics/HiddenVM.svg?label=github%20stars" /></a> <a href="#About"><img src="https://dummyimage.com/1x45/ffffff/ffffff.png" /></a></p>
+
+.. raw:: html
+
+    <h2><a href="#About">HiddenVM</a></h2>
+
+**Emergency fix for Whonix users if you receive an error preventing VM from booting since VirtualBox 6.1.20 update on 2021-04-20: In each affected VM (Settings > Storage) change 'Type' to e.g. 'AHCI'. VM will then boot as normal. No idea on the security implications of choosing a different controller type from default SAS choice by Whonix project. Ongoing situation. We prefer you by default to have the latest VirtualBox vs. the most recent version Whonix advises for their OVA. Whonix on Tails is by no means the only use case of HiddenVM, and OSes observed to be unaffected in VirtualBox 6.1.20 include Windows, macOS and Ubuntu.**
+
 .. contents::
 
 About
@@ -29,6 +39,21 @@ HiddenVM: *insanely private!*
 Installation and usage
 ----------------------
 
+**Before you install:**
+
+* 
+  Always have two Tails USB sticks, with one as a backup of the latest working Tails for your current HiddenVM.
+
+* 
+  Always upgrade Tails on your second stick, in case the new Tails doesn't work with your current HiddenVM.
+
+*
+  Always give us time to troubleshoot and fix our code to make it work with a new Tails version. Thank you for your patience.
+
+*
+  This will give you stability and prevent you from being locked out of your HiddenVM at any point due to a Tails upgrade.
+
+**Install:**
 
 * 
   Boot into `Tails <https://tails.boum.org>`_ on your computer and set an `admin password <https://tails.boum.org/doc/first_steps/startup_options/administration_password/index.en.html>`_ for your session.
@@ -48,8 +73,10 @@ Installation and usage
 * 
   Choose to store HiddenVM in your secure storage and it will download all binaries to launch VirtualBox.
 
+**Usage:**
+
 * 
-  After first-time install you can then use HiddenVM offline where each AppImage launch takes about 2 minutes.
+  After initially installing HiddenVM you can use it offline where each VirtualBox launch takes about 2 minutes.
 
 How can I trust the HiddenVM AppImage file?
 -------------------------------------------
