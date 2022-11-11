@@ -78,7 +78,7 @@ fi
 # terminal server and open a client terminal on it.
 
 SERVER_APP_ID="hidden.vm.id"
-/usr/lib/gnome-terminal/gnome-terminal-server --app-id "${SERVER_APP_ID}" &
+/usr/libexec/gnome-terminal-server --app-id "${SERVER_APP_ID}" &
 
 # Try to launch a terminal on the server. We have 10s before the server goes
 # away! The server may take some time to come up, so we have to retry on error.
@@ -86,7 +86,7 @@ SERVER_APP_ID="hidden.vm.id"
 while
     gnome-terminal --app-id "${SERVER_APP_ID}" --working-directory "${HERE}" -- \
         bash -c "./launch-log-progress.sh \"${ENV_FILE_ARG}\" \"${LOG_FILE}\"" 2>&1 | \
-        grep Error
+        grep "Error creating terminal"
 do
     error "gnome-terminal-server '${SERVER_APP_ID}' is not ready, trying again..."
     sleep 1
