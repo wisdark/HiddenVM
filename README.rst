@@ -9,6 +9,8 @@
 
     <h2><a href="#About">HiddenVM</a></h2>
 
+PLEASE NOTE: If at any time Tails pushes an unexpected update, and HiddenVM is not yet updated for it, and you are stuck with a new Tails and no working HiddenVM version, you can re-download and temporarily use an earlier version of Tails until HiddenVM is updated. There are `archived direct HTTP download mirrors of Tails images <https://web.archive.org/https://mirrors.edge.kernel.org/tails/stable/>`_, `archived official torrents with PGP signatures <https://web.archive.org/https://tails.net/torrents/files/>`_, or third party archives at linuxtracker.org or fosstorrents.com etc. (Always verify third party torrents with archived official PGP sigs for safety.) Unless there is a known security vulnerability patched by the new Tails which actually affects how you use Tails, doing a temporary downgrade is not unsafe. You aren't necessarily unsafe by using older-than-one-month-old Tails software for a short time. Thank you for your patience, and stay safe.
+
 .. contents::
 
 About
@@ -20,7 +22,7 @@ Imagine you're entering a country at the airport. The border agents seize your l
 
 Whether you use Windows, macOS or Linux, now there's a tech solution for better privacy: **HiddenVM**.
 
-**HiddenVM** is a simple, one-click, free and open-source Linux application that allows you to run Oracle's open-source `VirtualBox software <https://virtualbox.org>`_ on the `Tails operating system <https://tails.boum.org>`_.
+**HiddenVM** is a simple, one-click, free and open-source Linux application that allows you to run Oracle's open-source `VirtualBox software <https://virtualbox.org>`_ on the `Tails operating system <https://tails.net/>`_.
 
 This means you can run almost any OS as a VM inside the most anti-forensic computing environment in the world. Works where Tails does.
 
@@ -54,10 +56,10 @@ Installation and usage
 **Install:**
 
 * 
-  Boot into `Tails <https://tails.boum.org>`_ on your computer and set an `admin password <https://tails.boum.org/doc/first_steps/startup_options/administration_password/index.en.html>`_ for your session.
+  Boot into `Tails <https://tails.net>`_ on your computer and set an `admin password <https://tails.net/doc/first_steps/welcome_screen/administration_password/index.en.html>`_ for your session.
 
 * 
-  `Do NOT use <#why-shouldnt-i-use-tails-official-persistent-volume-feature>`_ Tails' `persistent volume feature <https://tails.boum.org/doc/first_steps/persistence/index.en.html>`_.
+  `Do NOT use <#why-shouldnt-i-use-tails-official-persistent-volume-feature>`_ Tails' `persistent volume feature <hhttps://tails.net/doc/persistent_storage/index.en.html>`_.
 
 * 
   Create and mount a deniable, secure storage environment on internal or external media such as a `VeraCrypt <https://veracrypt.fr/en>`_ volume.
@@ -151,6 +153,11 @@ Every 7 days, if you're connected to the Internet HiddenVM will do an ``apt-get`
 
 Every time you do a Tails and HiddenVM upgrade, the first time after this will almost always need to install new package versions, thus taking around 5 minutes or longer. Then it returns to the usual 2 minutes.
 
+I'm getting a "Connection timed out", HiddenVM fails! What to do?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+See `here <https://github.com/aforensics/HiddenVM/issues/34>`_. It's the current Tor circuit failing. Simply close off HiddenVM and try again, or try other options in the linked issue.
+
 Can I use HiddenVM offline?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -160,7 +167,7 @@ We can't guarantee this, but limited testing by the team has confirmed it being 
 
 As soon as you connect to the Internet, HiddenVM may upgrade its cached software and you may have to upgrade to the latest version from our GitHub as well as your Tails, but after all software is updated and verified as in sync by HiddenVM, it could be possible to use it offline for an extended period again.
 
-Known limitations:
+Known limitations
 ^^^^^^^^^^^^^^^^^^
 
 
@@ -196,7 +203,7 @@ Warning: Make sure your commands work or it can cause HiddenVM to produce errors
 Why shouldn't I use Tails' official persistent volume feature?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Tails' `Additional Software <https://tails.boum.org/doc/first_steps/additional_software/index.en.html#index1h2>`_ feature disturbs HiddenVM's complicated ``apt-get update`` wizardry that achieves our VirtualBox-installing breakthrough.
+Tails' `Additional Software <https://tails.net/doc/persistent_storage/additional_software/index.en.html#index1h2>`_ feature disturbs HiddenVM's complicated ``apt-get update`` wizardry that achieves our VirtualBox-installing breakthrough.
 
 More importantly, our intention is for HVM's virtual machines to be truly 'hidden', i.e. forensically undetectable. This is the first time you can emulate VeraCrypt's Windows `Hidden OS <https://www.veracrypt.fr/en/VeraCrypt%20Hidden%20Operating%20System.html>`_ feature, but this time the plausible deniability hasn't been `broken by security researchers <https://www.researchgate.net/publication/318155607_Defeating_Plausible_Deniability_of_VeraCrypt_Hidden_Operating_Systems>`_ and it's for any OS you want.
 
@@ -233,7 +240,7 @@ Is HiddenVM risky software that undermines the safety of Tails?
 
 We do change a few security settings in the Tails Debian system in order to make HiddenVM do its thing. Apart from the fact that you can inspect our code, we'll add to our Wiki the list of exactly what HiddenVM temporarily modifies in your Tails environment from a security standpoint, so that you can know exactly what's going on.
 
-E.g. HiddenVM hooks into Tails' `'clearnet' user <https://tails.boum.org/contribute/design/Unsafe_Browser/#index2h2>`_ infrastructure, which some people are already concerned about existing in Tails.
+E.g. HiddenVM hooks into Tails' `'clearnet' user <https://tails.net/contribute/design/Unsafe_Browser/#index2h2>`_ infrastructure, which some people are already concerned about existing in Tails.
 
 We also increase the ``sudo`` timeout to improve the user experience to only require password authentication one time. This is because HiddenVM can sometimes take a while to do its thing when initially installing or during weekly updates. This timeout is not normally extended in Tails' Debian environment and it may give elevated privileges to malware you could accidentally download in your main Tails environment.
 
@@ -265,7 +272,7 @@ Your data is not 'private' or 'hidden' during your use of your computer with you
 
 Our claim of effective deniability is a very broad one and might not apply to your particular scenario. We might not be able to cater to your scenario but we are very interested in studying it and our Wiki could become a place to document various scenarios and solutions for deniability in the context of HiddenVM.
 
-The Tails project lists other limitations and warnings which may apply. `Please read them <https://tails.boum.org/doc/about/warning/index.en.html>`_.
+The Tails project lists other limitations and warnings which may apply. `Please read them <https://tails.net/doc/about/warnings/index.en.html>`_.
 
 Disclaimer
 ----------
